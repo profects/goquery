@@ -1,6 +1,7 @@
 package goquery
 
 import (
+	"crypto/tls"
 	"errors"
 	"io"
 	"net/http"
@@ -34,6 +35,25 @@ func NewDocumentFromNode(root *html.Node) *Document {
 func NewDocument(url string) (*Document, error) {
 	// Load the URL
 	res, e := http.Get(url)
+	if e != nil {
+		return nil, e
+	}
+	return NewDocumentFromResponse(res)
+}
+
+// NewDocumentWithoutCertVerify is a Document constructor that takes a string
+// URL as argument. It loads the specified document, parses it, and stores the
+// root Document node, ready to be manipulated. To fetch the document it uses
+// a custom transport which does not check for a valid certificate.
+func NewDocumentWithoutCertVerify(url string) (*Document, error) {
+	// Build custom transport with client
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
+	// Load the URL
+	res, e := client.Get(url)
 	if e != nil {
 		return nil, e
 	}
