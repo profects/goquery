@@ -57,6 +57,7 @@ func NewDocumentWithoutCertVerify(url string) (*Document, error) {
 	if e != nil {
 		return nil, e
 	}
+	defer res.Body.Close()
 	return NewDocumentFromResponse(res)
 }
 
